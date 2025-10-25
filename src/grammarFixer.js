@@ -117,7 +117,7 @@ function findSubstringPosition(text, substring, startIndex = 0) {
   }
   
   return {
-    start: start,
+    start,
     end: start + substring.length
   };
 }
