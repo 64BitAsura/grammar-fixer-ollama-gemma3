@@ -1,15 +1,20 @@
 # Grammar Fixer - Ollama Gemma3
 
-A Node.js application that uses Ollama with the Gemma3 model to fix grammar in text. The application returns structured JSON objects for each grammar change, detailing the location, original text, and corrected text.
+A production-ready Node.js application that uses Ollama with the Gemma3 model to fix grammar in text. The application returns structured JSON objects for each grammar change, detailing the location, original text, and corrected text.
 
 ## Features
 
-- Fix grammar errors in text using Ollama and Gemma3
-- Returns JSON objects with detailed change information:
-  - Location of the change (start/end positions)
+- ✅ Fix grammar errors in text using Ollama and Gemma3
+- ✅ Returns JSON objects with detailed change information:
+  - Location of the change (start/end character positions)
   - Original characters (old text)
   - Corrected characters (new text)
-- Easy-to-use API for grammar correction
+  - Optional explanation of the grammar error
+- ✅ Multiple input methods: inline text, stdin, or file
+- ✅ Command-line interface with helpful options
+- ✅ Easy-to-use programmatic API
+- ✅ Comprehensive test coverage with Jest
+- ✅ Error handling and connection management
 
 ## Prerequisites
 
@@ -49,6 +54,11 @@ ollama pull gemma3
 Run with example texts:
 ```bash
 npm start
+```
+
+Run the comprehensive examples:
+```bash
+npm run examples
 ```
 
 Process inline text:
@@ -235,20 +245,213 @@ console.log(correctedText); // "She doesn't like apples"
 
 ## Development
 
-### Adding New Features
+### Running Tests
 
-1. Implement your feature in the `src/` directory
-2. Add corresponding tests in the `tests/` directory
-3. Run tests to ensure everything works: `npm test`
+Run all tests:
+```bash
+npm test
+```
+
+Run tests in watch mode for development:
+```bash
+npm test:watch
+```
+
+Run tests with coverage report:
+```bash
+npm test:coverage
+```
 
 ### Code Structure
 
-- `src/index.js`: Main entry point, demonstrates usage
-- `src/grammarFixer.js`: Contains the core logic for interacting with Ollama and processing grammar corrections
+- `src/index.js`: Main entry point with CLI interface and input handling
+- `src/grammarFixer.js`: Core grammar correction logic with Ollama integration
+- `tests/`: Comprehensive Jest test suites
+- `data/`: Sample input files for testing
+
+### Architecture
+
+The application follows a modular architecture:
+
+1. **Input Layer** (`index.js`): Handles various input sources (CLI args, stdin, files)
+2. **Processing Layer** (`grammarFixer.js`): Communicates with Ollama/Gemma3 to identify grammar errors
+3. **Output Layer** (`index.js`): Formats and displays results in JSON format
+
+### How It Works
+
+1. Input text is received from the user
+2. The text is sent to Ollama with a carefully crafted prompt
+3. Gemma3 analyzes the text and returns grammar corrections in JSON format
+4. The response is parsed and validated
+5. Character positions are calculated for each correction
+6. Results are returned as structured JSON objects
+
+## Examples
+
+### Example 1: Basic Grammar Correction
+
+```bash
+$ npm start -- "She dont like apples"
+```
+
+Output:
+```json
+[
+  {
+    "location": { "start": 4, "end": 8 },
+    "oldText": "dont",
+    "newText": "doesn't",
+    "explanation": "Incorrect contraction"
+  }
+]
+```
+
+### Example 2: Multiple Errors
+
+```bash
+$ npm start -- "He go to school and she dont care"
+```
+
+Output:
+```json
+[
+  {
+    "location": { "start": 3, "end": 5 },
+    "oldText": "go",
+    "newText": "goes",
+    "explanation": "Subject-verb agreement"
+  },
+  {
+    "location": { "start": 24, "end": 28 },
+    "oldText": "dont",
+    "newText": "doesn't",
+    "explanation": "Incorrect contraction"
+  }
+]
+```
+
+### Example 3: Processing a File
+
+Create a file `my-text.txt`:
+```
+She dont like apples.
+He go to school everyday.
+```
+
+Run:
+```bash
+$ npm start -- --file my-text.txt
+```
+
+### Example 4: Using as a Module
+
+```javascript
+const { fixGrammar } = require('./src/grammarFixer');
+const { applyCorrections } = require('./src/index');
+
+async function correctGrammar(text) {
+  try {
+    // Get corrections
+    const corrections = await fixGrammar(text);
+    
+    // Display corrections
+    console.log('Found', corrections.length, 'corrections');
+    corrections.forEach(c => {
+      console.log(`- "${c.oldText}" → "${c.newText}"`);
+    });
+    
+    // Apply corrections to get corrected text
+    const correctedText = applyCorrections(text, corrections);
+    console.log('Corrected:', correctedText);
+    
+    return { corrections, correctedText };
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+}
+
+correctGrammar('She dont like apples');
+```
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Steps to Contribute
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Make your changes and add tests
+4. Run tests to ensure everything works (`npm test`)
+5. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+6. Push to the branch (`git push origin feature/AmazingFeature`)
+7. Open a Pull Request
+
+## Troubleshooting
+
+### "Unable to connect to Ollama" Error
+
+**Problem**: The application cannot connect to Ollama.
+
+**Solutions**:
+1. Ensure Ollama is installed: Visit https://ollama.ai/
+2. Start Ollama service: `ollama serve`
+3. Verify Ollama is running: `curl http://localhost:11434/api/tags`
+4. Check if port 11434 is available and not blocked by firewall
+
+### "Model not found" Error
+
+**Problem**: The Gemma3 model is not available.
+
+**Solution**:
+```bash
+ollama pull gemma3
+```
+
+### Slow Response Times
+
+**Problem**: Grammar checking takes a long time.
+
+**Causes and Solutions**:
+- **First run**: Model loading takes time on first request (normal)
+- **Large text**: Break text into smaller chunks
+- **System resources**: Ollama requires adequate RAM and CPU
+- **Model size**: Gemma3 is a large model; ensure your system meets requirements
+
+### Tests Failing
+
+**Problem**: Tests fail when running `npm test`.
+
+**Solution**:
+- Tests use mocked Ollama responses and should work without Ollama running
+- Ensure all dependencies are installed: `npm install`
+- Clear Jest cache: `npm test -- --clearCache`
+- Check Node.js version (requires v16+): `node --version`
+
+### Custom Ollama Host
+
+If Ollama is running on a different host or port:
+
+```javascript
+const corrections = await fixGrammar(text, {
+  host: 'http://your-host:11434'
+});
+```
+
+## Performance
+
+- **Average response time**: 1-3 seconds per text (depends on text length and system)
+- **Recommended text length**: Up to 500 words per request
+- **Concurrent requests**: Supported through Node.js async operations
+- **Memory usage**: Depends on Ollama model size (Gemma3 requires ~8GB RAM)
+
+## Limitations
+
+- Requires Ollama to be running locally or accessible over network
+- Grammar corrections depend on the quality of the Gemma3 model
+- May not catch all grammar errors or may flag correct usage as errors
+- Processing time increases with text length
+- Requires adequate system resources for running Ollama
 
 ## License
 
