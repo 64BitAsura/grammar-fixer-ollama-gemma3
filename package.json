@@ -1,0 +1,34 @@
+{
+  "name": "grammar-fixer-ollama-gemma3",
+  "version": "1.0.0",
+  "description": "Grammar fixer using Ollama and Gemma3 that returns JSON objects detailing grammar changes",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "grammar",
+    "ollama",
+    "gemma3",
+    "nlp",
+    "text-processing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ollama": "^0.5.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "She dont like apples",
+    "description": "Subject-verb agreement error"
+  },
+  {
+    "text": "He go to school everyday",
+    "description": "Verb conjugation error"
+  },
+  {
+    "text": "They was happy to see me",
+    "description": "Subject-verb agreement with plural subject"
+  },
+  {
+    "text": "I seen that movie yesterday",
+    "description": "Incorrect past tense verb form"
+  },
+  {
+    "text": "Me and him went to the store",
+    "description": "Incorrect pronoun usage"
+  },
+  {
+    "text": "The book is more better than the movie",
+    "description": "Double comparative"
+  },
+  {
+    "text": "Could of been better",
+    "description": "Common 'could have' vs 'could of' error"
+  },
+  {
+    "text": "Their going to the park",
+    "description": "Homophone confusion (their/they're)"
+  },
+  {
+    "text": "Its a beautiful day",
+    "description": "Contraction vs possessive (its/it's)"
+  },
+  {
+    "text": "I have went there before",
+    "description": "Incorrect past participle"
+  }
+]
