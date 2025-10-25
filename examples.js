@@ -16,7 +16,7 @@ const examples = [
   },
   {
     title: "Verb conjugation",
-    text: "He go to school everyday"
+    text: "He go to school every day"
   },
   {
     title: "Plural subject with singular verb",
