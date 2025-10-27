@@ -59,7 +59,7 @@ jobs:
         echo "✓ Project structure verified"
     
     - name: Run tests with real Ollama
-      run:  npx -y start-server-and-test "ollama serve" http://localhost:11434 "npm test"
+      run:  "npm test"
       env:
         OLLAMA_HOST: http://localhost:11434
     
