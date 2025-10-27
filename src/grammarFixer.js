@@ -27,8 +27,8 @@ async function fixGrammar(text, options = {}) {
   }
 
   const config = {
-    model: options.model || 'gemma3',
-    host: options.host || 'http://localhost:11434'
+    model: options.model || process.env.OLLAMA_MODEL || 'gemma3',
+    host: options.host || process.env.OLLAMA_HOST || 'http://localhost:11434'
   };
   
   try {

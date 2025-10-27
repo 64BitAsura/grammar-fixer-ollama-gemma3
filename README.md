@@ -154,10 +154,21 @@ Example output:
 
 ## Testing
 
-This project uses Jest as the testing framework.
+This project uses Jest as the testing framework. **Important**: Tests now connect to a real Ollama instance rather than using mocks.
+
+### Prerequisites for Testing:
+- Ollama must be installed and running (`ollama serve`)
+- A compatible model must be available (gemma3 or gemma:2b)
 
 ### Run all tests:
 ```bash
+# Ensure Ollama is running
+ollama serve &
+
+# Pull the model if not already done
+ollama pull gemma3
+
+# Run tests
 npm test
 ```
 
@@ -169,6 +180,15 @@ npm test:watch
 ### Run tests with coverage:
 ```bash
 npm test:coverage
+```
+
+### Environment Variables for Testing:
+- `OLLAMA_HOST`: Set custom Ollama host (default: http://localhost:11434)
+- `OLLAMA_MODEL`: Set custom model (default: gemma3)
+
+Example:
+```bash
+OLLAMA_HOST=http://localhost:11434 OLLAMA_MODEL=gemma:2b npm test
 ```
 
 ## Project Structure
@@ -548,10 +568,41 @@ ollama pull gemma3
 **Problem**: Tests fail when running `npm test`.
 
 **Solution**:
-- Tests use mocked Ollama responses and should work without Ollama running
+- Tests now connect to a real Ollama instance and require Ollama to be running
+- Ensure Ollama is installed and running: `ollama serve`
+- Ensure the gemma3 model is pulled: `ollama pull gemma3` (or use `ollama pull gemma:2b` as fallback)
 - Ensure all dependencies are installed: `npm install`
-- Clear Jest cache: `npm test -- --clearCache`
+- Clear Jest cache if needed: `npm test -- --clearCache`
 - Check Node.js version (requires v16+): `node --version`
+- Set environment variables if using custom host: `OLLAMA_HOST=http://localhost:11434 npm test`
+
+### Running Tests
+
+**Prerequisites**:
+1. Ollama must be installed and running
+2. A compatible model (gemma3 or gemma:2b) must be pulled
+
+**Run tests**:
+```bash
+# Start Ollama in the background
+ollama serve &
+
+# Pull the model (if not already done)
+ollama pull gemma3
+
+# Run the tests
+npm test
+```
+
+**With custom Ollama host**:
+```bash
+OLLAMA_HOST=http://your-host:11434 npm test
+```
+
+**With custom model**:
+```bash
+OLLAMA_MODEL=gemma:2b npm test
+```
 
 ### Custom Ollama Host
 
