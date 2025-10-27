@@ -160,6 +160,17 @@ This project uses Jest as the testing framework. **Important**: Tests now connec
 - Ollama must be installed and running (`ollama serve`)
 - A compatible model must be available (gemma3 or gemma:2b)
 
+### Quick Start - Using the Test Script:
+```bash
+# Make sure Ollama is running
+ollama serve &
+
+# Run the test script (automatically checks prerequisites)
+./run-tests.sh
+```
+
+### Manual Testing:
+
 ### Run all tests:
 ```bash
 # Ensure Ollama is running
