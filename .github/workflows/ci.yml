@@ -25,6 +25,46 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     
+    - name: Install Ollama
+      run: |
+        echo "Installing Ollama..."
+        curl -fsSL https://ollama.com/install.sh | sh
+        echo "✓ Ollama installed"
+    
+    - name: Start Ollama service
+      run: |
+        echo "Starting Ollama service..."
+        ollama serve > /tmp/ollama.log 2>&1 &
+        echo $! > /tmp/ollama.pid
+        echo "Waiting for Ollama to be ready..."
+        for i in {1..30}; do
+          if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
+            echo "✓ Ollama is ready"
+            break
+          fi
+          if [ $i -eq 30 ]; then
+            echo "✗ Ollama failed to start"
+            cat /tmp/ollama.log
+            exit 1
+          fi
+          sleep 2
+        done
+    
+    - name: Pull Gemma3 model
+      run: |
+        echo "Pulling gemma3 model..."
+        if ollama pull gemma3; then
+          echo "✓ Successfully pulled gemma3"
+          echo "OLLAMA_MODEL=gemma3" >> $GITHUB_ENV
+        else
+          echo "Failed to pull gemma3, trying gemma:2b as fallback..."
+          ollama pull gemma:2b
+          echo "✓ Pulled gemma:2b as fallback"
+          echo "OLLAMA_MODEL=gemma:2b" >> $GITHUB_ENV
+        fi
+        echo "Available models:"
+        ollama list
+    
     - name: Install dependencies
       run: npm ci
     
@@ -37,12 +77,16 @@ jobs:
         test -d tests || exit 1
         echo "✓ Project structure verified"
     
-    - name: Run tests with mock LLM
+    - name: Run tests with real Ollama
       run: npm test
+      env:
+        OLLAMA_HOST: http://localhost:11434
     
     - name: Run tests with coverage
       run: npm run test:coverage
       if: matrix.node-version == '20.x'
+      env:
+        OLLAMA_HOST: http://localhost:11434
     
     - name: Upload coverage to artifacts
       uses: actions/upload-artifact@v4
@@ -59,3 +103,11 @@ jobs:
         if [ -d "coverage" ]; then
           echo "✓ Coverage directory exists"
         fi
+    
+    - name: Stop Ollama service
+      if: always()
+      run: |
+        if [ -f /tmp/ollama.pid ]; then
+          kill $(cat /tmp/ollama.pid) || true
+        fi
+        echo "✓ Ollama service stopped"
