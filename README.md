@@ -308,7 +308,7 @@ npm run validate:openapi
 
 Or directly with:
 ```bash
-npx @apidevtools/swagger-cli validate openapi.yaml
+npx --yes @apidevtools/swagger-cli validate openapi.yaml
 ```
 
 ## API Reference
