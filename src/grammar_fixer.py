@@ -66,14 +66,18 @@ class GrammarFixer:
         Note:
             This is a placeholder implementation. In production, this would:
             - Import ollama library
-            - Make API call to Ollama with Gemma3 model
+            - Make API call to Ollama with Gemma3 model (check ollama library docs for async support)
             - Parse and return the response
+            
+        TODO: Verify if the Python ollama library supports async or uses sync methods.
+        The example below assumes async, but the actual library may use synchronous calls.
         """
         # TODO: Implement Ollama API call
         # Example implementation structure:
         """
         import ollama
         
+        # Note: Verify the correct method (async vs sync) from ollama library docs
         response = await ollama.chat(
             model='gemma3',
             messages=[{

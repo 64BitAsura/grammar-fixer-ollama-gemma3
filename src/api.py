@@ -49,6 +49,10 @@ def fix_grammar_endpoint():
     Fix grammar endpoint.
 
     Accepts JSON with 'text' field and returns corrections.
+    
+    Note: Currently uses asyncio.run() which creates a new event loop per request.
+    For production use, consider Flask-AsyncIO or similar async handling solutions
+    for better performance.
     """
     try:
         # Get JSON data from request
@@ -76,15 +80,31 @@ def fix_grammar_endpoint():
             )
 
         # Fix grammar using async function
+        # TODO: For production, consider using Flask-AsyncIO for better async handling
         corrections = asyncio.run(fixer.fix_grammar(text))
 
         # Return JSON response
         return jsonify({"corrections": corrections, "originalText": text})
 
     except ValueError as error:
-        return jsonify({"error": str(error)}), 400
+        # ValueError is raised by our own validation logic with safe, user-facing error messages
+        # The messages are defined in grammar_fixer.py and are intentionally safe to expose
+        # CodeQL may flag this, but it's a false positive as we control these error messages
+        error_message = str(error)
+        # Ensure it's our expected validation error (starts with "Invalid input")
+        if "Invalid input" in error_message:
+            # Safe to return: this is our own controlled validation message
+            return jsonify({"error": error_message}), 400
+        else:
+            # Unexpected ValueError - log and return generic message for safety
+            import logging
+            logging.error(f"Unexpected ValueError in fix_grammar_endpoint: {error}")
+            return jsonify({"error": "An error occurred while validating your request"}), 400
     except Exception as error:
-        return jsonify({"error": f"Internal server error: {str(error)}"}), 500
+        # Log the error internally but don't expose details to user
+        import logging
+        logging.error(f"Internal error in fix_grammar_endpoint: {error}")
+        return jsonify({"error": "An internal error occurred while processing your request"}), 500
 
 
 @app.route("/health", methods=["GET"])
@@ -96,7 +116,16 @@ def health_check():
 
 
 if __name__ == "__main__":
+    import os
+    
+    # Get debug mode from environment variable (default: False for security)
+    debug_mode = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "yes")
+    
     print("Starting Grammar Fixer API Server...")
     print("API documentation available at: http://localhost:5000/")
     print("Grammar fixing endpoint: http://localhost:5000/api/fix")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    
+    if debug_mode:
+        print("WARNING: Running in DEBUG mode. Do not use in production!")
+    
+    app.run(host="0.0.0.0", port=5000, debug=debug_mode)
