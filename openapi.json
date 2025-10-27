@@ -1,0 +1,501 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Grammar Fixer API",
+    "description": "A production-ready API that uses Ollama with the Gemma3 model to fix grammar in text.\nThe API returns structured JSON objects for each grammar change, detailing the location,\noriginal text, and corrected text.\n\n## Features\n- Fix grammar errors in text using Ollama and Gemma3\n- Returns JSON objects with detailed change information\n- Configurable model and host settings\n\n## Prerequisites\n- Ollama must be installed and running\n- Gemma3 model must be pulled (`ollama pull gemma3`)\n",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Grammar Fixer Support"
+    },
+    "license": {
+      "name": "ISC"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    },
+    {
+      "url": "http://localhost:11434",
+      "description": "Ollama server (default)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Grammar",
+      "description": "Grammar checking and correction operations"
+    }
+  ],
+  "paths": {
+    "/grammar/fix": {
+      "post": {
+        "tags": [
+          "Grammar"
+        ],
+        "summary": "Fix grammar in text",
+        "description": "Analyzes the input text and returns an array of grammar corrections.\nEach correction includes the location (character positions), original text,\ncorrected text, and an optional explanation.\n",
+        "operationId": "fixGrammar",
+        "requestBody": {
+          "description": "Text to analyze and grammar correction options",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrammarFixRequest"
+              },
+              "examples": {
+                "simple": {
+                  "summary": "Simple grammar check",
+                  "value": {
+                    "text": "She dont like apples"
+                  }
+                },
+                "withOptions": {
+                  "summary": "Grammar check with custom options",
+                  "value": {
+                    "text": "He go to school everyday",
+                    "options": {
+                      "model": "gemma3",
+                      "host": "http://localhost:11434"
+                    }
+                  }
+                },
+                "multipleErrors": {
+                  "summary": "Text with multiple errors",
+                  "value": {
+                    "text": "He go to school and she dont care"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful grammar analysis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrammarFixResponse"
+                },
+                "examples": {
+                  "singleCorrection": {
+                    "summary": "Single correction found",
+                    "value": {
+                      "corrections": [
+                        {
+                          "location": {
+                            "start": 4,
+                            "end": 8
+                          },
+                          "oldText": "dont",
+                          "newText": "doesn't",
+                          "explanation": "Incorrect contraction"
+                        }
+                      ]
+                    }
+                  },
+                  "noErrors": {
+                    "summary": "No corrections needed",
+                    "value": {
+                      "corrections": []
+                    }
+                  },
+                  "multipleCorrections": {
+                    "summary": "Multiple corrections found",
+                    "value": {
+                      "corrections": [
+                        {
+                          "location": {
+                            "start": 3,
+                            "end": 5
+                          },
+                          "oldText": "go",
+                          "newText": "goes",
+                          "explanation": "Subject-verb agreement"
+                        },
+                        {
+                          "location": {
+                            "start": 24,
+                            "end": 28
+                          },
+                          "oldText": "dont",
+                          "newText": "doesn't",
+                          "explanation": "Incorrect contraction"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "emptyText": {
+                    "summary": "Empty text provided",
+                    "value": {
+                      "error": "Invalid input: text must be a non-empty string"
+                    }
+                  },
+                  "invalidType": {
+                    "summary": "Invalid text type",
+                    "value": {
+                      "error": "Invalid input: text must be a non-empty string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Ollama connection error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "ollamaUnavailable": {
+                    "summary": "Ollama not running",
+                    "value": {
+                      "error": "Unable to connect to Ollama. Please ensure Ollama is running (ollama serve)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/grammar/apply": {
+      "post": {
+        "tags": [
+          "Grammar"
+        ],
+        "summary": "Apply corrections to text",
+        "description": "Applies an array of corrections to the original text and returns the corrected version.\nThe corrections should be in the same format as returned by the /grammar/fix endpoint.\n",
+        "operationId": "applyCorrections",
+        "requestBody": {
+          "description": "Original text and corrections to apply",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyCorrectionsRequest"
+              },
+              "examples": {
+                "simple": {
+                  "summary": "Apply single correction",
+                  "value": {
+                    "text": "She dont like apples",
+                    "corrections": [
+                      {
+                        "location": {
+                          "start": 4,
+                          "end": 8
+                        },
+                        "oldText": "dont",
+                        "newText": "doesn't",
+                        "explanation": "Incorrect contraction"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Corrections successfully applied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyCorrectionsResponse"
+                },
+                "examples": {
+                  "corrected": {
+                    "summary": "Corrected text",
+                    "value": {
+                      "originalText": "She dont like apples",
+                      "correctedText": "She doesn't like apples"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check",
+        "description": "Check if the API and Ollama service are running",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "examples": {
+                  "healthy": {
+                    "summary": "All services running",
+                    "value": {
+                      "status": "healthy",
+                      "ollama": "connected",
+                      "model": "gemma3"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is unhealthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "examples": {
+                  "unhealthy": {
+                    "summary": "Ollama unavailable",
+                    "value": {
+                      "status": "unhealthy",
+                      "ollama": "disconnected",
+                      "error": "Unable to connect to Ollama"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GrammarFixRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The text to analyze and correct",
+            "minLength": 1,
+            "example": "She dont like apples"
+          },
+          "options": {
+            "type": "object",
+            "description": "Optional configuration for the grammar fixer",
+            "properties": {
+              "model": {
+                "type": "string",
+                "description": "The Ollama model to use",
+                "default": "gemma3",
+                "example": "gemma3"
+              },
+              "host": {
+                "type": "string",
+                "description": "The Ollama host URL",
+                "default": "http://localhost:11434",
+                "example": "http://localhost:11434",
+                "format": "uri"
+              }
+            }
+          }
+        }
+      },
+      "GrammarFixResponse": {
+        "type": "object",
+        "required": [
+          "corrections"
+        ],
+        "properties": {
+          "corrections": {
+            "type": "array",
+            "description": "Array of grammar corrections found in the text",
+            "items": {
+              "$ref": "#/components/schemas/Correction"
+            }
+          }
+        }
+      },
+      "Correction": {
+        "type": "object",
+        "required": [
+          "location",
+          "oldText",
+          "newText"
+        ],
+        "properties": {
+          "location": {
+            "type": "object",
+            "description": "Character position of the correction in the original text",
+            "required": [
+              "start",
+              "end"
+            ],
+            "properties": {
+              "start": {
+                "type": "integer",
+                "description": "Starting character index (0-based)",
+                "minimum": 0,
+                "example": 4
+              },
+              "end": {
+                "type": "integer",
+                "description": "Ending character index (exclusive)",
+                "minimum": 0,
+                "example": 8
+              }
+            }
+          },
+          "oldText": {
+            "type": "string",
+            "description": "The incorrect text that was found",
+            "example": "dont"
+          },
+          "newText": {
+            "type": "string",
+            "description": "The corrected text",
+            "example": "doesn't"
+          },
+          "explanation": {
+            "type": "string",
+            "description": "Optional explanation of the grammar error",
+            "example": "Incorrect contraction"
+          }
+        }
+      },
+      "ApplyCorrectionsRequest": {
+        "type": "object",
+        "required": [
+          "text",
+          "corrections"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The original text",
+            "example": "She dont like apples"
+          },
+          "corrections": {
+            "type": "array",
+            "description": "Array of corrections to apply",
+            "items": {
+              "$ref": "#/components/schemas/Correction"
+            }
+          }
+        }
+      },
+      "ApplyCorrectionsResponse": {
+        "type": "object",
+        "required": [
+          "originalText",
+          "correctedText"
+        ],
+        "properties": {
+          "originalText": {
+            "type": "string",
+            "description": "The original text before corrections",
+            "example": "She dont like apples"
+          },
+          "correctedText": {
+            "type": "string",
+            "description": "The text after applying all corrections",
+            "example": "She doesn't like apples"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "unhealthy"
+            ],
+            "description": "Overall health status of the service",
+            "example": "healthy"
+          },
+          "ollama": {
+            "type": "string",
+            "enum": [
+              "connected",
+              "disconnected"
+            ],
+            "description": "Connection status to Ollama service",
+            "example": "connected"
+          },
+          "model": {
+            "type": "string",
+            "description": "The model currently in use",
+            "example": "gemma3"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if service is unhealthy",
+            "example": "Unable to connect to Ollama"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message describing what went wrong",
+            "example": "Invalid input: text must be a non-empty string"
+          },
+          "code": {
+            "type": "string",
+            "description": "Error code for programmatic error handling",
+            "example": "INVALID_INPUT"
+          },
+          "details": {
+            "type": "object",
+            "description": "Additional error details",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  }
+}
