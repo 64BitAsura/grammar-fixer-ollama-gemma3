@@ -165,6 +165,9 @@ This project uses Jest as the testing framework. **Important**: Tests now connec
 # Make sure Ollama is running
 ollama serve &
 
+# Make the script executable (first time only)
+chmod +x run-tests.sh
+
 # Run the test script (automatically checks prerequisites)
 ./run-tests.sh
 ```

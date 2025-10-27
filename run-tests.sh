@@ -72,9 +72,15 @@ export OLLAMA_HOST=${OLLAMA_HOST:-http://localhost:11434}
 export OLLAMA_MODEL=$MODEL
 
 # Run tests
-npm test
-
-echo ""
-echo "========================================="
-echo "✓ All tests completed successfully!"
-echo "========================================="
+if npm test; then
+    echo ""
+    echo "========================================="
+    echo "✓ All tests completed successfully!"
+    echo "========================================="
+else
+    echo ""
+    echo "========================================="
+    echo "❌ Tests failed!"
+    echo "========================================="
+    exit 1
+fi
