@@ -5,13 +5,15 @@
  * It returns structured JSON objects detailing each grammar change.
  */
 
-// TODO: Import Ollama library when implementing
-// const ollama = require('ollama');
+const { Ollama } = require('ollama');
 
 /**
  * Fixes grammar in the provided text using Ollama and Gemma3
  * 
  * @param {string} text - The text to analyze and correct
+ * @param {Object} options - Optional configuration
+ * @param {string} options.model - Model to use (default: 'gemma3')
+ * @param {string} options.host - Ollama host (default: 'http://localhost:11434')
  * @returns {Promise<Array>} Array of correction objects with structure:
  *   {
  *     location: { start: number, end: number },
@@ -19,17 +21,19 @@
  *     newText: string
  *   }
  */
-async function fixGrammar(text) {
+async function fixGrammar(text, options = {}) {
   if (!text || typeof text !== 'string') {
     throw new Error('Invalid input: text must be a non-empty string');
   }
 
-  // TODO: Implement actual Ollama integration
-  // This is a placeholder implementation
+  const config = {
+    model: options.model || 'gemma3',
+    host: options.host || 'http://localhost:11434'
+  };
   
   try {
-    // Placeholder: In actual implementation, this will call Ollama with Gemma3
-    const corrections = await analyzeTextWithOllama(text);
+    // Call Ollama with Gemma3 to analyze the text
+    const corrections = await analyzeTextWithOllama(text, config);
     
     // Process and format the corrections
     const formattedCorrections = processCorrections(text, corrections);
@@ -46,26 +50,92 @@ async function fixGrammar(text) {
  * 
  * @private
  * @param {string} text - The text to analyze
+ * @param {Object} config - Configuration object
  * @returns {Promise<Array>} Raw corrections from Ollama
  */
-async function analyzeTextWithOllama(text) {
-  // TODO: Implement Ollama API call
-  // Example implementation structure:
-  /*
-  const response = await ollama.chat({
-    model: 'gemma3',
-    messages: [{
-      role: 'user',
-      content: `Fix the grammar in this text and provide changes in JSON format: "${text}"`
-    }],
-  });
+async function analyzeTextWithOllama(text, config) {
+  const ollama = new Ollama({ host: config.host });
   
-  return parseOllamaResponse(response);
-  */
-  
-  // Placeholder: Return empty array for now
-  console.log('Analyzing text with Ollama/Gemma3 (placeholder):', text);
-  return [];
+  // Create a detailed prompt for grammar correction
+  const prompt = `You are a grammar correction assistant. Analyze the following text and identify ALL grammar errors.
+
+For each error, provide the response in STRICT JSON format as an array of objects. Each object must have:
+- "oldText": the exact incorrect text from the original
+- "newText": the corrected text
+- "explanation": brief explanation of the error
+
+Original text: "${text}"
+
+Return ONLY the JSON array, nothing else. If there are no errors, return an empty array [].
+
+Example format:
+[
+  {
+    "oldText": "dont",
+    "newText": "doesn't",
+    "explanation": "Incorrect contraction"
+  }
+]`;
+
+  try {
+    const response = await ollama.generate({
+      model: config.model,
+      prompt: prompt,
+      stream: false,
+      options: {
+        temperature: 0.3,
+        top_p: 0.9
+      }
+    });
+
+    return parseOllamaResponse(response.response, text);
+  } catch (error) {
+    // If Ollama is not available, throw a more descriptive error
+    if (error.code === 'ECONNREFUSED' || 
+        error.cause?.code === 'ECONNREFUSED' ||
+        error.message?.includes('connect') ||
+        error.message?.includes('fetch failed')) {
+      throw new Error('Unable to connect to Ollama. Please ensure Ollama is running (ollama serve)');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Parses the response from Ollama to extract corrections
+ * 
+ * @private
+ * @param {string} responseText - The response text from Ollama
+ * @param {string} originalText - The original text for validation
+ * @returns {Array} Array of correction objects
+ */
+function parseOllamaResponse(responseText, originalText) {
+  try {
+    // Extract JSON from the response (it might have extra text)
+    let jsonMatch = responseText.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      console.warn('No JSON array found in Ollama response, returning empty corrections');
+      return [];
+    }
+
+    const corrections = JSON.parse(jsonMatch[0]);
+    
+    if (!Array.isArray(corrections)) {
+      console.warn('Ollama response is not an array, returning empty corrections');
+      return [];
+    }
+
+    // Validate and enrich corrections with position information
+    return corrections.filter(correction => {
+      return correction.oldText && 
+             correction.newText && 
+             typeof correction.oldText === 'string' &&
+             typeof correction.newText === 'string';
+    });
+  } catch (error) {
+    console.warn('Failed to parse Ollama response:', error.message);
+    return [];
+  }
 }
 
 /**
@@ -77,25 +147,37 @@ async function analyzeTextWithOllama(text) {
  * @returns {Array} Formatted correction objects
  */
 function processCorrections(originalText, rawCorrections) {
-  // TODO: Implement correction processing logic
-  // This function should:
-  // 1. Parse the corrections from Ollama's response
-  // 2. Calculate exact character positions (start, end)
-  // 3. Extract old and new text
-  // 4. Return formatted array of correction objects
-  
   const formattedCorrections = [];
+  let searchStartIndex = 0;
   
-  // Placeholder implementation
   for (const correction of rawCorrections) {
-    formattedCorrections.push({
-      location: {
-        start: correction.start || 0,
-        end: correction.end || 0
-      },
-      oldText: correction.oldText || '',
-      newText: correction.newText || ''
-    });
+    // Find the position of the old text in the original
+    const position = findSubstringPosition(originalText, correction.oldText, searchStartIndex);
+    
+    if (position) {
+      const formattedCorrection = {
+        location: {
+          start: position.start,
+          end: position.end
+        },
+        oldText: correction.oldText,
+        newText: correction.newText
+      };
+      
+      // Add explanation if available
+      if (correction.explanation) {
+        formattedCorrection.explanation = correction.explanation;
+      }
+      
+      // Validate before adding
+      if (isValidCorrection(formattedCorrection)) {
+        formattedCorrections.push(formattedCorrection);
+        // Move search index forward to handle multiple occurrences
+        searchStartIndex = position.end;
+      }
+    } else {
+      console.warn(`Could not find "${correction.oldText}" in original text`);
+    }
   }
   
   return formattedCorrections;
