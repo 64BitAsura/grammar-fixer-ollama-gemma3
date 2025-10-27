@@ -202,6 +202,18 @@ This project includes a comprehensive OpenAPI 3.0 schema that documents the API 
 
 You can view the API documentation using various tools:
 
+#### Using npm scripts (Recommended)
+```bash
+# View using Redoc (recommended)
+npm run docs
+
+# View using Swagger UI
+npm run docs:swagger
+
+# Validate the OpenAPI schema
+npm run validate:openapi
+```
+
 #### Using Swagger UI (Online)
 1. Go to [Swagger Editor](https://editor.swagger.io/)
 2. Copy and paste the contents of `openapi.yaml`
@@ -290,6 +302,11 @@ Health check endpoint to verify the service status.
 
 You can validate the OpenAPI schema using:
 
+```bash
+npm run validate:openapi
+```
+
+Or directly with:
 ```bash
 npx @apidevtools/swagger-cli validate openapi.yaml
 ```

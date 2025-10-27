@@ -8,7 +8,10 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "examples": "node examples.js"
+    "examples": "node examples.js",
+    "docs": "npx --yes @redocly/cli preview-docs openapi.yaml",
+    "docs:swagger": "npx --yes swagger-ui-watcher openapi.yaml",
+    "validate:openapi": "npx --yes @apidevtools/swagger-cli validate openapi.yaml"
   },
   "keywords": [
     "grammar",
