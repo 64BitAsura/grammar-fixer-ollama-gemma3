@@ -66,7 +66,7 @@ jobs:
         ollama list
     
     - name: Install dependencies
-      run: ollama serve && npm ci
+      run: npm ci
     
     - name: Verify code structure
       run: |
@@ -78,7 +78,7 @@ jobs:
         echo "✓ Project structure verified"
     
     - name: Run tests with real Ollama
-      run: npm test
+      run:  ollama serve && npm test
       env:
         OLLAMA_HOST: http://localhost:11434
     
