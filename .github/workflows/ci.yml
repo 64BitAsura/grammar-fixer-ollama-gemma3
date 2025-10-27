@@ -66,7 +66,7 @@ jobs:
         ollama list
     
     - name: Install dependencies
-      run: npm ci
+      run: ollama serve && npm ci
     
     - name: Verify code structure
       run: |
