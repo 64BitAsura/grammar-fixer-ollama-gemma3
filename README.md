@@ -15,6 +15,7 @@ A production-ready Node.js application that uses Ollama with the Gemma3 model to
 - ✅ Easy-to-use programmatic API
 - ✅ Comprehensive test coverage with Jest
 - ✅ Error handling and connection management
+- ✅ OpenAPI 3.0 schema for API documentation
 
 ## Prerequisites
 
@@ -181,9 +182,133 @@ grammar-fixer-ollama-gemma3/
 │   └── grammarFixer.test.js  # Jest tests
 ├── data/
 │   └── (sample input data)
+├── openapi.yaml           # OpenAPI 3.0 schema (YAML format)
+├── openapi.json           # OpenAPI 3.0 schema (JSON format)
 ├── package.json           # Project dependencies and scripts
 ├── README.md             # This file
 └── .gitignore           # Git ignore rules
+```
+
+## OpenAPI Schema
+
+This project includes a comprehensive OpenAPI 3.0 schema that documents the API endpoints, request/response formats, and data models.
+
+### Schema Files
+
+- **`openapi.yaml`**: OpenAPI schema in YAML format (recommended)
+- **`openapi.json`**: OpenAPI schema in JSON format
+
+### Viewing the API Documentation
+
+You can view the API documentation using various tools:
+
+#### Using npm scripts (Recommended)
+```bash
+# View using Redoc (recommended)
+npm run docs
+
+# View using Swagger UI
+npm run docs:swagger
+
+# Validate the OpenAPI schema
+npm run validate:openapi
+```
+
+#### Using Swagger UI (Online)
+1. Go to [Swagger Editor](https://editor.swagger.io/)
+2. Copy and paste the contents of `openapi.yaml`
+3. View the interactive documentation
+
+#### Using Swagger UI (Local)
+```bash
+npx --yes swagger-ui-watcher openapi.yaml
+```
+
+#### Using Redoc (Local)
+```bash
+npx --yes @redocly/cli preview-docs openapi.yaml
+```
+
+### API Endpoints
+
+The OpenAPI schema documents the following endpoints:
+
+#### `POST /grammar/fix`
+Analyzes text and returns grammar corrections.
+
+**Request:**
+```json
+{
+  "text": "She dont like apples",
+  "options": {
+    "model": "gemma3",
+    "host": "http://localhost:11434"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "corrections": [
+    {
+      "location": { "start": 4, "end": 8 },
+      "oldText": "dont",
+      "newText": "doesn't",
+      "explanation": "Incorrect contraction"
+    }
+  ]
+}
+```
+
+#### `POST /grammar/apply`
+Applies corrections to the original text.
+
+**Request:**
+```json
+{
+  "text": "She dont like apples",
+  "corrections": [
+    {
+      "location": { "start": 4, "end": 8 },
+      "oldText": "dont",
+      "newText": "doesn't"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "originalText": "She dont like apples",
+  "correctedText": "She doesn't like apples"
+}
+```
+
+#### `GET /health`
+Health check endpoint to verify the service status.
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "ollama": "connected",
+  "model": "gemma3"
+}
+```
+
+### Validating the Schema
+
+You can validate the OpenAPI schema using:
+
+```bash
+npm run validate:openapi
+```
+
+Or directly with:
+```bash
+npx --yes @apidevtools/swagger-cli validate openapi.yaml
 ```
 
 ## API Reference
