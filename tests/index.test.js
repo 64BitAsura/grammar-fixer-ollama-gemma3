@@ -5,6 +5,7 @@
 const { applyCorrections, readFromFile, processText } = require('../src/index');
 const fs = require('fs').promises;
 const path = require('path');
+const os = require('os');
 
 // Mock the fixGrammar function
 jest.mock('../src/grammarFixer', () => {
@@ -174,7 +175,7 @@ describe('Index Module', () => {
 
   describe('readFromFile', () => {
     // Create a temporary test file before tests
-    const testFilePath = path.join('/tmp', 'test-grammar-file.txt');
+    const testFilePath = path.join(os.tmpdir(), 'test-grammar-file.txt');
     const testContent = 'This is test content for reading from file.';
 
     beforeAll(async () => {
@@ -195,7 +196,7 @@ describe('Index Module', () => {
     });
 
     test('should handle relative paths by resolving to absolute', async () => {
-      // Write to a relative path in /tmp
+      // Write to a relative path in temp directory
       const relativeFile = 'test-relative.txt';
       const absolutePath = path.resolve(relativeFile);
       await fs.writeFile(absolutePath, 'relative content', 'utf-8');
@@ -209,12 +210,12 @@ describe('Index Module', () => {
     });
 
     test('should throw error for non-existent file', async () => {
-      const nonExistentPath = '/tmp/this-file-does-not-exist.txt';
+      const nonExistentPath = path.join(os.tmpdir(), 'this-file-does-not-exist.txt');
       await expect(readFromFile(nonExistentPath)).rejects.toThrow('Failed to read file');
     });
 
     test('should throw error with descriptive message', async () => {
-      const nonExistentPath = '/tmp/non-existent-file.txt';
+      const nonExistentPath = path.join(os.tmpdir(), 'non-existent-file.txt');
       await expect(readFromFile(nonExistentPath)).rejects.toThrow(
         /Failed to read file.*non-existent-file\.txt/
       );
@@ -222,7 +223,7 @@ describe('Index Module', () => {
 
     test('should read multi-line content', async () => {
       const multiLineContent = 'Line 1\nLine 2\nLine 3';
-      const multiLineFile = path.join('/tmp', 'multi-line-test.txt');
+      const multiLineFile = path.join(os.tmpdir(), 'multi-line-test.txt');
       await fs.writeFile(multiLineFile, multiLineContent, 'utf-8');
       
       try {
@@ -235,7 +236,7 @@ describe('Index Module', () => {
 
     test('should preserve special characters and encoding', async () => {
       const specialContent = 'Special chars: é, ñ, 中文, 😀';
-      const specialFile = path.join('/tmp', 'special-chars-test.txt');
+      const specialFile = path.join(os.tmpdir(), 'special-chars-test.txt');
       await fs.writeFile(specialFile, specialContent, 'utf-8');
       
       try {

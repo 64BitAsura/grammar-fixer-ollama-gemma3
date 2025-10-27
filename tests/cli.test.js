@@ -5,6 +5,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const os = require('os');
 
 // Mock the fixGrammar function to avoid Ollama dependency
 jest.mock('../src/grammarFixer', () => {
@@ -116,7 +117,7 @@ describe('CLI Integration Tests', () => {
   });
 
   describe('main function - file input', () => {
-    const testFilePath = path.join('/tmp', 'cli-test-file.txt');
+    const testFilePath = path.join(os.tmpdir(), 'cli-test-file.txt');
 
     beforeEach(async () => {
       await fs.writeFile(testFilePath, 'She dont like apples', 'utf-8');
@@ -171,7 +172,7 @@ describe('CLI Integration Tests', () => {
 
     test('should handle non-existent file', async () => {
       const originalArgv = process.argv;
-      process.argv = ['node', 'index.js', '--file', '/tmp/non-existent-file.txt'];
+      process.argv = ['node', 'index.js', '--file', path.join(os.tmpdir(), 'non-existent-file.txt')];
       
       const { main } = require('../src/index');
       await main();
