@@ -7,9 +7,6 @@ const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
 
-// Increase timeout for real Ollama calls
-jest.setTimeout(30000);
-
 describe('Index Module', () => {
   describe('applyCorrections', () => {
     test('should apply single correction', () => {

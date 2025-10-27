@@ -5,9 +5,6 @@
 
 const { fixGrammar, isValidCorrection, findSubstringPosition } = require('../src/grammarFixer');
 
-// Increase timeout for real Ollama calls
-jest.setTimeout(30000);
-
 describe('Grammar Fixer', () => {
   describe('fixGrammar', () => {
     test('should throw error for invalid input (null)', async () => {

@@ -53,11 +53,15 @@ jobs:
     - name: Pull Gemma3 model
       run: |
         echo "Pulling gemma3 model..."
-        ollama pull gemma3 || {
+        if ollama pull gemma3; then
+          echo "✓ Successfully pulled gemma3"
+          echo "OLLAMA_MODEL=gemma3" >> $GITHUB_ENV
+        else
           echo "Failed to pull gemma3, trying gemma:2b as fallback..."
           ollama pull gemma:2b
           echo "✓ Pulled gemma:2b as fallback"
-        }
+          echo "OLLAMA_MODEL=gemma:2b" >> $GITHUB_ENV
+        fi
         echo "Available models:"
         ollama list
     
