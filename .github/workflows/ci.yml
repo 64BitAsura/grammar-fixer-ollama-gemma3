@@ -39,7 +39,6 @@ jobs:
         echo "Waiting for Ollama to be ready..."
         for i in {1..30}; do
           if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
-            ollama stop
             echo "✓ Ollama is ready"
             break
           fi
@@ -79,7 +78,7 @@ jobs:
         echo "✓ Project structure verified"
     
     - name: Run tests with real Ollama
-      run:  npx -y start-server-and-test "ollama serve" http://localhost:11434 "npm test"
+      run:  npx -y start-server-and-test "echo 1" http://localhost:11434 "npm test"
       env:
         OLLAMA_HOST: http://localhost:11434
     
