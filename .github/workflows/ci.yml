@@ -88,6 +88,9 @@ jobs:
           echo "✓ Coverage directory exists"
         fi
     
+    - name: Build Docker image
+      run: npm run docker:build
+    
     - name: Stop Ollama service
       if: always()
       run: |
