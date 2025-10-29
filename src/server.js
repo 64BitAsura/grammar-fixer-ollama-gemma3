@@ -1,5 +1,5 @@
 /**
- * HTTP Server for Grammar Fixer Microservice
+ * HTTP Server for Grammar Fixer Microservice 
  * 
  * Provides REST API endpoints for the grammar fixing service
  */
