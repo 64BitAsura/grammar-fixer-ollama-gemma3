@@ -1,4 +1,5 @@
-# Node modules - will be installed in container (uncomment to exclude)
+# Node modules - included for standard Dockerfile (copies from host)
+# Uncomment the line below when using Dockerfile.multistage which installs in container
 # node_modules/
 npm-debug.log*
 yarn-debug.log*

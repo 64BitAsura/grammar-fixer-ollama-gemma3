@@ -21,8 +21,11 @@ WORKDIR /app
 # Copy package files
 COPY --chown=appuser:appuser package*.json ./
 
-# Copy node_modules - should be pre-installed on the host before building the image
-# For production: run `npm install --omit=dev` before building
+# Copy node_modules from host
+# NOTE: This approach requires node_modules to be installed on the host before building
+# Advantages: Works in restricted CI/CD environments without npm registry access
+# For production with full npm access, use Dockerfile.multistage instead
+# Build command: npm install --omit=dev && docker build -t grammar-fixer:latest .
 COPY --chown=appuser:appuser node_modules/ ./node_modules/
 
 # Copy application source code

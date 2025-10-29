@@ -27,6 +27,9 @@ The application can be deployed as a containerized microservice with full securi
 ### Quick Start with Docker Compose
 
 ```bash
+# Install dependencies first (required for standard Dockerfile)
+npm install --omit=dev
+
 # Start all services (Ollama + Grammar Fixer)
 docker-compose up -d
 
@@ -38,6 +41,10 @@ curl -X POST http://localhost:3000/grammar/fix \
   -H "Content-Type: application/json" \
   -d '{"text": "She dont like apples"}'
 ```
+
+**Note**: Two Dockerfile options available:
+- `Dockerfile` - Standard version (copies node_modules from host, works in restricted environments)
+- `Dockerfile.multistage` - Multi-stage build (installs dependencies in container, ideal for production)
 
 ### Docker Security Features
 

@@ -285,7 +285,7 @@ console.log('Processing request', {
 
 This document will be updated as new security features are added or vulnerabilities are discovered.
 
-Last updated: 2024-01-15
+Last updated: 2025-10-29
 
 ## Supported Versions
 
