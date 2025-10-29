@@ -22,7 +22,17 @@ A production-ready Node.js application that uses Ollama with the Gemma3 model to
 
 ## 🐳 Docker Deployment (Microservice Mode)
 
-The application can be deployed as a containerized microservice with full security best practices. See [DOCKER.md](DOCKER.md) for complete documentation.
+The application can be deployed as a containerized microservice with full security best practices. Docker images are automatically published to Docker Hub via CI/CD. See [DOCKER.md](DOCKER.md) for complete documentation.
+
+### Pull from Docker Hub
+
+```bash
+# Pull the latest image (replace 'username' with the actual Docker Hub username)
+docker pull username/grammar-fixer-ollama-gemma3:latest
+
+# Or pull a specific version
+docker pull username/grammar-fixer-ollama-gemma3:main-abc123
+```
 
 ### Quick Start with Docker Compose
 
