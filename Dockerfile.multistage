@@ -1,0 +1,68 @@
+# Multi-stage Dockerfile for production environments with full package manager access
+# This version is ideal for production deployments where npm registry is accessible
+# For CI/CD environments with restrictions, use the standard Dockerfile
+
+# Stage 1: Build stage
+FROM node:22-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --omit=dev && \
+    npm cache clean --force
+
+# Stage 2: Runtime stage
+FROM node:22-alpine
+
+# Set labels for metadata
+LABEL maintainer="grammar-fixer-ollama-gemma3"
+LABEL description="Grammar Fixer microservice using Ollama and Gemma3"
+LABEL version="1.0.0"
+
+# Install security updates and dumb-init for proper signal handling
+RUN apk --no-cache upgrade && \
+    apk --no-cache add dumb-init && \
+    rm -rf /var/cache/apk/*
+
+# Create a non-root user and group
+RUN addgroup -g 1001 -S appuser && \
+    adduser -u 1001 -S appuser -G appuser
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY --chown=appuser:appuser package*.json ./
+
+# Copy node_modules from builder stage
+COPY --from=builder --chown=appuser:appuser /app/node_modules ./node_modules
+
+# Copy application source code
+COPY --chown=appuser:appuser src/ ./src/
+COPY --chown=appuser:appuser openapi.json openapi.yaml ./
+
+# Set environment variables
+ENV NODE_ENV=production \
+    OLLAMA_HOST=http://host.docker.internal:11434 \
+    OLLAMA_MODEL=gemma3 \
+    PORT=3000
+
+# Switch to non-root user
+USER appuser
+
+# Expose port for health checks and potential HTTP API
+EXPOSE 3000
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/health', (r) => {r.statusCode === 200 ? process.exit(0) : process.exit(1)})" || exit 1
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Default command - run the HTTP server for microservice mode
+CMD ["node", "src/server.js"]
