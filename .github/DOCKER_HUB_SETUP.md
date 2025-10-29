@@ -163,8 +163,14 @@ docker run -d \
 ### How to verify the workflow
 
 ```bash
-# Check the workflow file syntax
+# Check the workflow file syntax (if Python is available)
 python3 -c "import yaml; yaml.safe_load(open('.github/workflows/docker.yml'))"
+
+# Or use GitHub's CLI to validate workflows
+gh workflow view "Docker Build and Security Scan"
+
+# Or push to a branch and check the Actions tab for validation
+# GitHub automatically validates workflow syntax on push
 
 # View workflow runs in GitHub
 # Go to: Repository → Actions → Docker Build and Security Scan

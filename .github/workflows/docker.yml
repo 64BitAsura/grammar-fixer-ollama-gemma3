@@ -130,6 +130,9 @@ jobs:
     permissions:
       contents: read
     
+    # Note: This job rebuilds the image to push to Docker Hub.
+    # Docker layer caching (cache-from: type=gha) ensures we reuse
+    # layers from the build-and-scan job, minimizing rebuild time.
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -163,7 +166,7 @@ jobs:
           type=raw,value=latest,enable={{is_default_branch}}
     
     - name: Build and push Docker image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         push: true
