@@ -419,10 +419,68 @@ docker push your-registry.com/grammar-fixer:1.0.0
 
 ### CI/CD Integration
 
-Add to your CI/CD pipeline:
+This project includes automated Docker Hub publishing via GitHub Actions.
+
+#### Automated Publishing to Docker Hub
+
+The `.github/workflows/docker.yml` workflow automatically publishes Docker images to Docker Hub when changes are pushed to the `main` or `master` branch. The workflow:
+
+1. Builds and scans the Docker image for vulnerabilities
+2. Runs security and functional tests
+3. Publishes the image to Docker Hub (only on push to main/master)
+
+#### Setting Up Docker Hub Secrets
+
+To enable automated publishing, configure the following secrets in your GitHub repository:
+
+1. Go to your repository on GitHub
+2. Navigate to **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret** and add:
+   - **Name**: `DOCKERHUB_USERNAME`
+     - **Value**: Your Docker Hub username
+   - **Name**: `DOCKERHUB_TOKEN`
+     - **Value**: Your Docker Hub access token (not your password!)
+
+**Creating a Docker Hub Access Token:**
+
+1. Log in to [Docker Hub](https://hub.docker.com)
+2. Go to **Account Settings** → **Security**
+3. Click **New Access Token**
+4. Give it a descriptive name (e.g., "GitHub Actions")
+5. Copy the token (you won't be able to see it again!)
+6. Use this token as the `DOCKERHUB_TOKEN` secret value
+
+#### Image Tags
+
+The CI/CD pipeline automatically tags images with:
+- `latest` - Latest stable version (only on default branch)
+- `<branch>-<sha>` - Branch name with commit SHA (e.g., `main-abc123`)
+- `<branch>` - Branch name (e.g., `main`)
+
+Example published images:
+- `username/grammar-fixer-ollama-gemma3:latest`
+- `username/grammar-fixer-ollama-gemma3:main`
+- `username/grammar-fixer-ollama-gemma3:main-abc123`
+
+#### Manual Publishing
+
+You can also manually push to Docker Hub:
+
+```bash
+# Tag for Docker Hub
+docker tag grammar-fixer:latest your-username/grammar-fixer-ollama-gemma3:latest
+
+# Log in to Docker Hub
+docker login
+
+# Push to Docker Hub
+docker push your-username/grammar-fixer-ollama-gemma3:latest
+```
+
+#### Example GitHub Actions workflow (for reference)
 
 ```yaml
-# Example GitHub Actions workflow
+# Automated in .github/workflows/docker.yml
 - name: Build Docker image
   run: docker build -t grammar-fixer:${{ github.sha }} .
 
@@ -433,8 +491,8 @@ Add to your CI/CD pipeline:
 
 - name: Push to registry
   run: |
-    echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
-    docker push grammar-fixer:${{ github.sha }}
+    echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+    docker push your-username/grammar-fixer-ollama-gemma3:${{ github.sha }}
 ```
 
 ## Monitoring and Logging
