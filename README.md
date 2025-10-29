@@ -16,6 +16,49 @@ A production-ready Node.js application that uses Ollama with the Gemma3 model to
 - ✅ Comprehensive test coverage with Jest
 - ✅ Error handling and connection management
 - ✅ OpenAPI 3.0 schema for API documentation
+- ✅ **Docker support with security best practices**
+- ✅ **HTTP REST API for microservice deployment**
+- ✅ **Docker Compose for easy deployment**
+
+## 🐳 Docker Deployment (Microservice Mode)
+
+The application can be deployed as a containerized microservice with full security best practices. See [DOCKER.md](DOCKER.md) for complete documentation.
+
+### Quick Start with Docker Compose
+
+```bash
+# Start all services (Ollama + Grammar Fixer)
+docker-compose up -d
+
+# Pull the model (first time only)
+docker-compose exec ollama ollama pull gemma3
+
+# Test the API
+curl -X POST http://localhost:3000/grammar/fix \
+  -H "Content-Type: application/json" \
+  -d '{"text": "She dont like apples"}'
+```
+
+### Docker Security Features
+
+- ✅ Non-root user (UID 1001)
+- ✅ Multi-stage build for minimal image size
+- ✅ Alpine Linux base for reduced attack surface
+- ✅ Health checks and graceful shutdown
+- ✅ Resource limits and security options
+- ✅ No new privileges flag
+- ✅ Security headers on all HTTP responses
+
+### API Endpoints
+
+When running as a microservice:
+
+- `GET /health` - Health check endpoint
+- `POST /grammar/fix` - Fix grammar in text
+- `POST /grammar/apply` - Apply corrections to text
+- `GET /` - API information
+
+See [DOCKER.md](DOCKER.md) for detailed API documentation and deployment instructions.
 
 ## Prerequisites
 

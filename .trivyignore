@@ -1,0 +1,9 @@
+# Trivy Security Scanner Ignore File
+# Add CVEs that are false positives or accepted risks
+
+# Example format:
+# CVE-2021-12345
+# Reason: This vulnerability doesn't affect our use case
+
+# Node.js Alpine base image known issues that don't apply
+# Add specific CVEs here as needed after security scan

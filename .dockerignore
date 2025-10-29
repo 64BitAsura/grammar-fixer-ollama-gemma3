@@ -1,0 +1,54 @@
+# Node modules - will be installed in container
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test files
+tests/
+coverage/
+jest.setup.js
+*.test.js
+.nyc_output
+
+# Git files
+.git/
+.gitignore
+.github/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation and examples (not needed in production)
+README.md
+LICENSE
+examples.js
+run-tests.sh
+
+# Data files (sample data not needed in production)
+data/
+
+# Build artifacts
+dist/
+build/
+*.tgz
+
+# Environment files
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
