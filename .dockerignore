@@ -1,5 +1,5 @@
-# Node modules - will be installed in container
-node_modules/
+# Node modules - will be installed in container (uncomment to exclude)
+# node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
